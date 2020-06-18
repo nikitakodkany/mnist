@@ -16,5 +16,11 @@ def oneHotEncoding(y):
 def toReturnEncoded():
     ytrainEncoded = oneHotEncoding(ytrain)
     ytestEncoded = oneHotEncoding(ytest)
-    
-    return xtrain, ytrainEncoded, xtest, ytestEncoded
+
+    #transformed data
+    xtrainReshaped = xtrain.T.reshape(784, 60000)
+    ytrainEncoded = ytrainEncoded.reshape(60000, 10).T
+    xtestReshaped = xtest.T.reshape(784, 10000)
+    ytestEncoded = ytestEncoded.reshape(10000, 10).T
+
+    return xtrainReshaped, ytrainEncoded, xtestReshaped, ytestEncoded
