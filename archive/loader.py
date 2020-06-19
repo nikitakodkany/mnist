@@ -15,5 +15,7 @@ def load_data(prefix, folder):
 def toReturn():
     traininImages, trainingLabels = load_data("train", "dataset")
     testImages, testLabels = load_data("t10k", "dataset")
-    
+    print()
+    print("Images and Labels loaded!")
+
     return traininImages, trainingLabels, testImages, testLabels
