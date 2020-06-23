@@ -23,4 +23,4 @@ def toReturnEncoded():
     xtestReshaped = xtest.T.reshape(784, 10000)
     ytestEncoded = ytestEncoded.reshape(10000, 10).T
 
-    return xtrainReshaped, ytrainEncoded, xtestReshaped, ytestEncoded, xtrain.T
+    return xtrainReshaped, ytrainEncoded, xtestReshaped, ytestEncoded, xtrain.T, ytrain
