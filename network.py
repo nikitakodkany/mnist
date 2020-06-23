@@ -1,7 +1,9 @@
 #libraries
 import math
+import tkinter
 import numpy as np
 from time import sleep
+from pymsgbox import *
 import matplotlib.pyplot as plt
 from archive.activations import *
 from progressbar import progressbar
@@ -10,10 +12,10 @@ import warnings
 warnings.filterwarnings("ignore", message= "the imp module is deprecated in favour of importlib; see the module's documentation for alternative uses")
 
 from archive.onehoten import toReturnEncoded
-xtrain, ytrain, xtest, ytest, check = toReturnEncoded()
+xtrain, ytrain, xtest, ytest, X, Y = toReturnEncoded()
 
 # #data visualization
-# image = check[:,:,1]
+# image = x[:,:,1]
 # fig = plt.figure
 # plt.imshow(image, cmap = 'gray')
 # plt.show()
@@ -177,11 +179,14 @@ def main():
             n.backward(minibatch_x, minibatch_y)
             n.update()
 
-    plt.title('Cost Function')
-    plt.xlabel('No. of Epochs')
-    plt.ylabel('Cost')
-    plt.plot(costs)
-    plt.show()
+    alert(text='Training Complete!', title='ALERT', button='OK')
+
+    # To plot Cost vs Epochs
+    # plt.title('Cost Function')
+    # plt.xlabel('No. of Epochs')
+    # plt.ylabel('Cost')
+    # plt.plot(costs)
+    # plt.show()
 
 
 if __name__ == '__main__':
