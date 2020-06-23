@@ -1,7 +1,10 @@
 #libraries
 import math
 import numpy as np
+from time import sleep
+import matplotlib.pyplot as plt
 from archive.activations import *
+from progressbar import progressbar
 
 import warnings
 warnings.filterwarnings("ignore", message= "the imp module is deprecated in favour of importlib; see the module's documentation for alternative uses")
@@ -15,11 +18,9 @@ xtrain, ytrain, xtest, ytest, check = toReturnEncoded()
 # plt.imshow(image, cmap = 'gray')
 # plt.show()
 
-#feature scaling
-from sklearn.preprocessing import StandardScaler
-sc = StandardScaler()
-xtrain = sc.fit_transform(xtrain)
-ytrain = sc.fit_transform(xtrain)
+#normalize
+xtrain = (xtrain - np.mean(xtrain))/np.std(xtrain)
+xtest = (xtest - np.mean(xtest))/ np.std(xtest)
 
 #initialization
 m = xtrain.shape[1]
@@ -45,8 +46,6 @@ class network:
         self.cache['w2'] = np.random.randn(n_2, n_1) * (np.sqrt(2.0 / n_1))
         self.cache['w3'] = np.random.randn(n_3, n_2) * (np.sqrt(2.0 / n_2))
         self.cache['w4'] = np.random.randn(n_y, n_3) * (np.sqrt(2.0 / n_3))
-
-
         #bias initialization
         self.cache['b1'] = np.zeros((n_1, 1))
         self.cache['b2'] = np.zeros((n_2, 1))
@@ -54,12 +53,7 @@ class network:
         self.cache['b4'] = np.zeros((n_y, 1))
 
     def forward(self, x):
-
         #forward propagation with bias
-
-        # if x is None:
-        #     x = self.cache['x']
-
         w1, w2, w3, w4, b1, b2, b3, b4 = self.get('w1', 'w2', 'w3', 'w4', 'b1', 'b2', 'b3', 'b4')
 
         z1 = np.dot(w1, x) + b1
@@ -71,12 +65,10 @@ class network:
         dz2 = leakyrelu_prime(z2)
 
         z3 = np.dot(w3, a2) + b3
-        print(z3)
         a3 = leakyrelu(z3)
         dz3 = leakyrelu_prime(z3)
 
         z4 = np.dot(w4, a3) + b4
-        # print(z4)
         a4 = softmax(z4)
 
         self.put(dz1 = dz1, dz2 = dz2, dz3 = dz3, a1 = a1, a2 = a2, a3 = a3, a4 = a4)
@@ -84,18 +76,12 @@ class network:
 
     def cost(self, ypred, y):
         #cost with l2 regularization
-
-        # if y is None:
-        #     y = self.cache['y']
-
-
-
         w1, w2, w3, w4 = self.get('w1', 'w2', 'w3', 'w4')
 
         cost_entropy = cost = -np.mean(y * np.log(ypred + 1e-8))
-        # l2_regularization = lambd / (2*m) * (np.sum(np.square(w1)) + np.sum(np.square(w2)) + np.sum(np.square(w3)) + np.sum(np.square(w4)))
+        l2_regularization = lambd / (2*m) * (np.sum(np.square(w1)) + np.sum(np.square(w2)) + np.sum(np.square(w3)) + np.sum(np.square(w4)))
 
-        cost = cost_entropy #+ l2_regularization
+        cost = cost_entropy + l2_regularization
         return cost
 
 
@@ -104,23 +90,19 @@ class network:
         a1, a2, a3, a4, w1, w2, w3, w4, dz1, dz2, dz3= self.get('a1', 'a2', 'a3', 'a4', 'w1', 'w2', 'w3', 'w4', 'dz1', 'dz2', 'dz3')
 
         t4 = a4 - y
-        # dw4 = 1./m * (np.dot(t4, a3.T) + ((lambd/m) * w4))
-        dw4 = 1./m * (np.dot(t4, a3.T))
+        dw4 = 1./m * (np.dot(t4, a3.T) + ((lambd/m) * w4))
         db4 = 1./m * (np.sum(t4, axis=1, keepdims = True))
 
         t3 = np.multiply(dz3, np.dot(w4.T, t4))
-        # dw3 = 1./m * (np.dot(t3, a2.T) + ((lambd/m) * w3))
-        dw3 = 1./m * (np.dot(t3, a2.T))
+        dw3 = 1./m * (np.dot(t3, a2.T) + ((lambd/m) * w3))
         db3 = 1./m * (np.sum(t3, axis=1, keepdims = True))
 
         t2 = np.multiply(dz2, np.dot(w3.T, t3))
-        # dw2 = 1./m * (np.dot(t2, a1.T) + ((lambd/m) * w2))
-        dw2 = 1./m * (np.dot(t2, a1.T))
+        dw2 = 1./m * (np.dot(t2, a1.T) + ((lambd/m) * w2))
         db2 = 1./m * (np.sum(t2, axis=1, keepdims = True))
 
         t1 = np.multiply(dz1, np.dot(w2.T, t2))
-        # dw1 = 1./m * (np.dot(t1, x.T) + ((lambd/m) * w1))
-        dw1 = 1./m * (np.dot(t1, x.T))
+        dw1 = 1./m * (np.dot(t1, x.T) + ((lambd/m) * w1))
         db1 = 1./m * (np.sum(t1, axis=1, keepdims = True))
 
         self.put(dw4 = dw4, dw3 = dw3, dw2 = dw2, dw1 = dw1, db4 = db4, db3 = db3, db2 = db2, db1 = db1)
@@ -179,16 +161,14 @@ class network:
         return mini_batches
 
 
-import matplotlib.pyplot as plt
-from progressbar import ProgressBar
 
 def main():
-    bar = ProgressBar()
+
     costs = []
     epoch = 10
     n = network(xtrain, ytrain)
 
-    for i in range(epoch):
+    for i in progressbar(range(epoch)):
         minibatches = n.func_minibatch()
         for minibatch in minibatches:
             (minibatch_x, minibatch_y) = minibatch
@@ -197,8 +177,9 @@ def main():
             n.backward(minibatch_x, minibatch_y)
             n.update()
 
-
-    # cost vs epochs graph
+    plt.title('Cost Function')
+    plt.xlabel('No. of Epochs')
+    plt.ylabel('Cost')
     plt.plot(costs)
     plt.show()
 
