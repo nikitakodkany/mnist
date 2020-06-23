@@ -1,16 +1,22 @@
 #libraries
-import sys
+import math
 import numpy as np
-import time
 from archive.activations import *
-import matplotlib.pyplot as plt
-from progressbar import ProgressBar
-from archive.onehoten import toReturnEncoded
-from sklearn.preprocessing import StandardScaler
 
-xtrain, ytrain, xtest, ytest = toReturnEncoded()
+import warnings
+warnings.filterwarnings("ignore", message= "the imp module is deprecated in favour of importlib; see the module's documentation for alternative uses")
+
+from archive.onehoten import toReturnEncoded
+xtrain, ytrain, xtest, ytest, check = toReturnEncoded()
+
+# #data visualization
+# image = check[:,:,1]
+# fig = plt.figure
+# plt.imshow(image, cmap = 'gray')
+# plt.show()
 
 #feature scaling
+from sklearn.preprocessing import StandardScaler
 sc = StandardScaler()
 xtrain = sc.fit_transform(xtrain)
 ytrain = sc.fit_transform(xtrain)
@@ -47,11 +53,12 @@ class network:
         self.cache['b3'] = np.zeros((n_3, 1))
         self.cache['b4'] = np.zeros((n_y, 1))
 
-    def forward(self, x = None):
+    def forward(self, x):
+
         #forward propagation with bias
 
-        if x is None:
-            x = self.cache['x']
+        # if x is None:
+        #     x = self.cache['x']
 
         w1, w2, w3, w4, b1, b2, b3, b4 = self.get('w1', 'w2', 'w3', 'w4', 'b1', 'b2', 'b3', 'b4')
 
@@ -64,20 +71,24 @@ class network:
         dz2 = leakyrelu_prime(z2)
 
         z3 = np.dot(w3, a2) + b3
+        print(z3)
         a3 = leakyrelu(z3)
         dz3 = leakyrelu_prime(z3)
 
         z4 = np.dot(w4, a3) + b4
+        # print(z4)
         a4 = softmax(z4)
 
         self.put(dz1 = dz1, dz2 = dz2, dz3 = dz3, a1 = a1, a2 = a2, a3 = a3, a4 = a4)
         return a4
 
-    def cost(self, ypred, y= None):
+    def cost(self, ypred, y):
         #cost with l2 regularization
 
-        if y is None:
-            y = self.cache['y']
+        # if y is None:
+        #     y = self.cache['y']
+
+
 
         w1, w2, w3, w4 = self.get('w1', 'w2', 'w3', 'w4')
 
@@ -88,9 +99,9 @@ class network:
         return cost
 
 
-    def backward(self):
+    def backward(self, x, y):
         #back propagation with bias and regularization
-        a1, a2, a3, a4, y, w1, w2, w3, w4, dz1, dz2, dz3, x = self.get('a1', 'a2', 'a3', 'a4', 'y', 'w1', 'w2', 'w3', 'w4', 'dz1', 'dz2', 'dz3', 'x')
+        a1, a2, a3, a4, w1, w2, w3, w4, dz1, dz2, dz3= self.get('a1', 'a2', 'a3', 'a4', 'w1', 'w2', 'w3', 'w4', 'dz1', 'dz2', 'dz3')
 
         t4 = a4 - y
         # dw4 = 1./m * (np.dot(t4, a3.T) + ((lambd/m) * w4))
@@ -140,23 +151,56 @@ class network:
         x = tuple(map(lambda x: self.cache[x], args))
         return x
 
+    def func_minibatch(self, batchsize = 32):
+
+        x, y = self.get('x', 'y')
+        np.random.seed(2)
+
+        mini_batches =[]
+        permutation = list(np.random.permutation(m))
+        shuffled_x = x[:, permutation]
+        shuffled_y = y[:, permutation]
+
+        #number of minibatches of batchsize in partitioning
+        num_complete_minibatches = math.floor(m/ batchsize)
+        for k in range(0, num_complete_minibatches):
+            minibatch_x = shuffled_x[:, k * batchsize : (k+1) * batchsize]
+            minibatch_y = shuffled_y[:, k * batchsize : (k+1) * batchsize]
+            mini_batch = (minibatch_x, minibatch_y)
+            mini_batches.append(mini_batch)
+
+        # Handling the end case (last mini-batch < mini_batch_size)
+        if m % batchsize != 0:
+            minibatch_x = shuffled_x[:, num_complete_minibatches * batchsize : m]
+            minibatch_y = shuffled_y[:, num_complete_minibatches * batchsize : m]
+            mini_batch = (minibatch_x, minibatch_y)
+            mini_batches.append(mini_batch)
+
+        return mini_batches
+
+
+import matplotlib.pyplot as plt
+from progressbar import ProgressBar
+
 def main():
     bar = ProgressBar()
     costs = []
     epoch = 10
     n = network(xtrain, ytrain)
 
-    print("Training Started...")
-    for i in bar(range(epoch)):
-        ypred = n.forward()
-        costs.append(n.cost(ypred))
-        n.backward()
-        n.update()
-    print("Training Done!")
+    for i in range(epoch):
+        minibatches = n.func_minibatch()
+        for minibatch in minibatches:
+            (minibatch_x, minibatch_y) = minibatch
+            ypred = n.forward(minibatch_x)
+            costs.append(n.cost(ypred, minibatch_y))
+            n.backward(minibatch_x, minibatch_y)
+            n.update()
 
-    # # cost vs epochs graph
-    # plt.plot(costs)
-    # plt.show()
+
+    # cost vs epochs graph
+    plt.plot(costs)
+    plt.show()
 
 
 if __name__ == '__main__':
