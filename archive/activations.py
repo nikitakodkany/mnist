@@ -26,12 +26,5 @@ def softmax(z):
 	return exp/sums
 
 def softmax(z):
-	try:
-		# exp_z = np.exp(z - np.max(z, axis=0))
-		maxv = np.max(z, axis = 0)
-		val = z - maxv
-		exp_z = np.exp(val)
-		return exp_z / exp_z.sum(axis=0, keepdims=True)
-
-	except RuntimeWarning:
-		print(maxv)
+	exp_z = np.exp(z - np.max(z, axis=0))
+	return exp_z / exp_z.sum(axis=0, keepdims=True)
