@@ -16,6 +16,8 @@ def toReturn():
     traininImages, trainingLabels = load_data("train", "dataset")
     testImages, testLabels = load_data("t10k", "dataset")
     print()
-    print("Images and Labels loaded!")
+    print("Images loaded...")
+    print("Labels loaded...")
+    print()
 
     return traininImages, trainingLabels, testImages, testLabels
