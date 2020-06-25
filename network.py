@@ -1,15 +1,20 @@
 #libraries
+import csv
 import math
+import time
 import tkinter
 import numpy as np
 from time import sleep
 from pymsgbox import *
-import matplotlib.pyplot as plt
 from archive.activations import *
 from progressbar import progressbar
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 import warnings
 warnings.filterwarnings("ignore", message= "the imp module is deprecated in favour of importlib; see the module's documentation for alternative uses")
+warnings.filterwarnings("ignore", message= "unclosed file <_io.TextIOWrapper name='dymplot.csv' mode='r' encoding='UTF-8'>")
+
 
 from archive.onehoten import toReturnEncoded
 xtrain, ytrain, xtest, ytest, X, Y = toReturnEncoded()
@@ -30,6 +35,7 @@ lambd = 0.1
 
 class network:
     def __init__(self,xtrain, ytrain):
+
         #layer size
         n_x = xtrain.shape[0]
         n_1 = 28
@@ -163,23 +169,40 @@ class network:
         return mini_batches
 
 
-
 def main():
-
-    costs = []
-    epoch = 10
+    f = open('dymplot.csv', 'w')
+    f.truncate()
+    f.close()
+    # cost = []
+    epochs = 10
     n = network(xtrain, ytrain)
 
-    for i in progressbar(range(epoch)):
+
+    for epoch in progressbar(range(epochs)):
         minibatches = n.func_minibatch()
         for minibatch in minibatches:
             (minibatch_x, minibatch_y) = minibatch
             ypred = n.forward(minibatch_x)
-            costs.append(n.cost(ypred, minibatch_y))
+            # costs.append(n.cost(ypred, minibatch_y))
+            cost = n.cost(ypred, minibatch_y)
             n.backward(minibatch_x, minibatch_y)
             n.update()
 
+        # with open('dymplot.csv', 'a', newline='') as csvfile:
+        #     fieldnames = ['epoch','cost']
+        #     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        #     writer.writerow({'epoch': epoch, 'cost': cost})
+
     alert(text='Training Complete!', title='ALERT', button='OK')
+
+
+
+    # ypred_rounded = np.argmax(ypred, axis = 0)
+    # count = 0
+    # for i in range(0, 32):
+    #     if ypred_rounded[i] == Y[i]:
+    #         count += 1
+    # print("Model accuracy is {}".format((count/32)*100))
 
     # To plot Cost vs Epochs
     # plt.title('Cost Function')
