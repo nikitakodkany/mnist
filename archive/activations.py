@@ -17,13 +17,13 @@ def leakyrelu_prime(z):
 	z = np.where(z > 0, 1.0, 0.0)
 	return z
 
-def softmax(z):
-	maxs = np.max(z,axis= 0)
-
-	shift = z - maxs
-	exp = np.exp(shift)
-	sums = np.sum(exp , axis = 0)
-	return exp/sums
+# def softmax(z):
+# 	maxs = np.max(z,axis= 0)
+#
+# 	shift = z - maxs
+# 	exp = np.exp(shift)
+# 	sums = np.sum(exp , axis = 0)
+# 	return exp/sums
 
 def softmax(z):
 	exp_z = np.exp(z - np.max(z, axis=0))
