@@ -9,7 +9,6 @@ from pymsgbox import *
 from archive.activations import *
 from progressbar import progressbar
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 
 import warnings
 warnings.filterwarnings("ignore", message= "the imp module is deprecated in favour of importlib; see the module's documentation for alternative uses")
@@ -19,8 +18,10 @@ warnings.filterwarnings("ignore", message= "unclosed file <_io.TextIOWrapper nam
 from archive.onehoten import toReturnEncoded
 xtrain, ytrain, xtest, ytest, X, Y = toReturnEncoded()
 
+
 # #data visualization
-# image = x[:,:,1]
+# ximage = X.T
+# image = ximage[:,:,1]
 # fig = plt.figure
 # plt.imshow(image, cmap = 'gray')
 # plt.show()
@@ -170,11 +171,9 @@ class network:
 
 
 def main():
-    f = open('dymplot.csv', 'w')
-    f.truncate()
-    f.close()
+
     costs = []
-    epochs = 400
+    epochs = 10
     n = network(xtrain, ytrain)
 
 
@@ -187,20 +186,21 @@ def main():
             n.backward(minibatch_x, minibatch_y)
             n.update()
 
-    ypred = ypred.T
-    ypred = np.argmax(ypred, axis = 1)
+            ypred = np.argmax(ypred.T, axis = 1).reshape(32,1)
+            minibatch_y = np.argmax(minibatch_y.T, axis = 1).reshape(32,1)
+            count = 0
+            for a, b in zip(ypred, minibatch_y):
+                if a == b:
+                    count += 1
+    print("Model accuracy of minibatch: {}%".format((count*100)/ypred.shape[0]))
 
-    count = 0
-    for i in range(0, 32):
-        if ypred[i] == Y[i]:
-            count += 1
-    print("Model accuracy is {}".format((count/32)*100))
-
-
+    ypredicted = n.forward(xtrain)
+    ypredicted = np.argmax(ypredicted.T, axis = 1)
+    print(ypredicted.shape)
 
     # To plot Cost vs Epochs
-    plt.title('Cost Function')
-    plt.xlabel('No. of Epochs')
+    plt.title('Cost vs Iterations')
+    plt.xlabel('Iteration')
     plt.ylabel('Cost')
     plt.plot(costs)
     plt.show()
