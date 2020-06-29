@@ -1,10 +1,8 @@
 #libraries
-import csv
 import math
 import time
 import tkinter
 import numpy as np
-from time import sleep
 from pymsgbox import *
 from archive.functions import *
 from progressbar import progressbar
@@ -173,7 +171,7 @@ class network:
 def main():
 
     costs = []
-    epochs = 200
+    epochs = 500
     n = network(xtrain, ytrain)
 
 
@@ -209,6 +207,9 @@ def main():
     print("Model accuracy - test network: {}%".format((count*100)/y_test.shape[0]))
 
 
+    alert(text='Training Complete!', title='ALERT', button='OK')
+
+
     # To plot Cost vs Epochs
     plt.title('Cost vs Iterations')
     plt.xlabel('Iteration')
@@ -216,8 +217,6 @@ def main():
     plt.plot(costs)
     plt.show()
 
-
-    alert(text='Training Complete!', title='ALERT', button='OK')
 
 if __name__ == '__main__':
     main()
