@@ -173,8 +173,8 @@ def main():
     f = open('dymplot.csv', 'w')
     f.truncate()
     f.close()
-    # cost = []
-    epochs = 1500
+    costs = []
+    epochs = 400
     n = network(xtrain, ytrain)
 
 
@@ -183,15 +183,9 @@ def main():
         for minibatch in minibatches:
             (minibatch_x, minibatch_y) = minibatch
             ypred = n.forward(minibatch_x)
-            # costs.append(n.cost(ypred, minibatch_y))
-            cost = n.cost(ypred, minibatch_y)
+            costs.append(n.cost(ypred, minibatch_y))
             n.backward(minibatch_x, minibatch_y)
             n.update()
-
-        # with open('dymplot.csv', 'a', newline='') as csvfile:
-        #     fieldnames = ['epoch','cost']
-        #     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        #     writer.writerow({'epoch': epoch, 'cost': cost})
 
     ypred = ypred.T
     ypred = np.argmax(ypred, axis = 1)
@@ -202,15 +196,17 @@ def main():
             count += 1
     print("Model accuracy is {}".format((count/32)*100))
 
-    alert(text='Training Complete!', title='ALERT', button='OK')
+
 
     # To plot Cost vs Epochs
-    # plt.title('Cost Function')
-    # plt.xlabel('No. of Epochs')
-    # plt.ylabel('Cost')
-    # plt.plot(costs)
-    # plt.show()
+    plt.title('Cost Function')
+    plt.xlabel('No. of Epochs')
+    plt.ylabel('Cost')
+    plt.plot(costs)
+    plt.show()
 
+
+    alert(text='Training Complete!', title='ALERT', button='OK')
 
 if __name__ == '__main__':
     main()
