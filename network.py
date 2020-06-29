@@ -186,6 +186,7 @@ def main():
             n.backward(minibatch_x, minibatch_y)
             n.update()
 
+            #accuracy for minibatch
             ypred = np.argmax(ypred.T, axis = 1).reshape(32,1)
             minibatch_y = np.argmax(minibatch_y.T, axis = 1).reshape(32,1)
             count = accuracy(ypred, minibatch_y)
@@ -193,11 +194,19 @@ def main():
     print("")
     print("Model accuracy - minibatch: {}%".format((count*100)/ypred.shape[0]))
 
-    ypredicted = n.forward(xtrain)
-    ypredicted = np.argmax(ypredicted.T, axis = 1).reshape(60000, 1)
-    y = np.argmax(ytrain.T, axis = 1).reshape(60000, 1)
-    count = accuracy(ypredicted, y)
-    print("Model accuracy - network: {}%".format((count*100)/y.shape[0]))
+    #accuracy for the training network
+    ytrain_pred = n.forward(xtrain)
+    ytrain_pred = np.argmax(ytrain_pred.T, axis = 1).reshape(60000, 1)
+    y_train = np.argmax(ytrain.T, axis = 1).reshape(60000, 1)
+    count = accuracy(ytrain_pred, y_train)
+    print("Model accuracy - training network: {}%".format((count*100)/y_train.shape[0]))
+
+    #accuracy for test network
+    ytest_pred = n.forward(xtest)
+    ytest_pred = np.argmax(ytest_pred.T, axis = 1).reshape(10000,1)
+    y_test = np.argmax(ytest.T, axis = 1).reshape(10000,1)
+    count = accuracy(ytest_pred, y_test)
+    print("Model accuracy - test network: {}%".format((count*100)/y_test.shape[0]))
 
 
     # To plot Cost vs Epochs
