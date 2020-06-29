@@ -19,12 +19,12 @@ from archive.onehoten import toReturnEncoded
 xtrain, ytrain, xtest, ytest, X, Y = toReturnEncoded()
 
 
-# #data visualization
-# ximage = X.T
-# image = ximage[:,:,1]
-# fig = plt.figure
-# plt.imshow(image, cmap = 'gray')
-# plt.show()
+#data visualization
+ximage = X.T
+image = ximage[:,:,1]
+fig = plt.figure
+plt.imshow(image, cmap = 'gray')
+plt.show()
 
 #normalize
 xtrain = (xtrain - np.mean(xtrain))/np.std(xtrain)
