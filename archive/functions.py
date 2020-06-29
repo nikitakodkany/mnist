@@ -20,3 +20,10 @@ def leakyrelu_prime(z):
 def softmax(z):
 	exp_z = np.exp(z - np.max(z, axis=0))
 	return exp_z / exp_z.sum(axis=0, keepdims=True)
+
+def accuracy(ypred, y):
+	count = 0
+	for a, b in zip(ypred, y):
+		if a == b:
+			count += 1
+	return count
