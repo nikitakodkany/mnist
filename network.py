@@ -6,7 +6,7 @@ import tkinter
 import numpy as np
 from time import sleep
 from pymsgbox import *
-from archive.activations import *
+from archive.functions import *
 from progressbar import progressbar
 import matplotlib.pyplot as plt
 
@@ -173,7 +173,7 @@ class network:
 def main():
 
     costs = []
-    epochs = 10
+    epochs = 200
     n = network(xtrain, ytrain)
 
 
@@ -188,15 +188,17 @@ def main():
 
             ypred = np.argmax(ypred.T, axis = 1).reshape(32,1)
             minibatch_y = np.argmax(minibatch_y.T, axis = 1).reshape(32,1)
-            count = 0
-            for a, b in zip(ypred, minibatch_y):
-                if a == b:
-                    count += 1
-    print("Model accuracy of minibatch: {}%".format((count*100)/ypred.shape[0]))
+            count = accuracy(ypred, minibatch_y)
+
+    print("")
+    print("Model accuracy - minibatch: {}%".format((count*100)/ypred.shape[0]))
 
     ypredicted = n.forward(xtrain)
-    ypredicted = np.argmax(ypredicted.T, axis = 1)
-    print(ypredicted.shape)
+    ypredicted = np.argmax(ypredicted.T, axis = 1).reshape(60000, 1)
+    y = np.argmax(ytrain.T, axis = 1).reshape(60000, 1)
+    count = accuracy(ypredicted, y)
+    print("Model accuracy - network: {}%".format((count*100)/y.shape[0]))
+
 
     # To plot Cost vs Epochs
     plt.title('Cost vs Iterations')
