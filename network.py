@@ -38,9 +38,9 @@ class network:
 
         #layer size
         n_x = xtrain.shape[0]
-        n_1 = 28
-        n_2 = 24
-        n_3 = 16
+        n_1 = 112
+        n_2 = 86
+        n_3 = 90
         n_y = ytrain.shape[0]
 
         np.random.seed(2)
@@ -174,7 +174,7 @@ def main():
     f.truncate()
     f.close()
     # cost = []
-    epochs = 10
+    epochs = 1500
     n = network(xtrain, ytrain)
 
 
@@ -193,16 +193,16 @@ def main():
         #     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         #     writer.writerow({'epoch': epoch, 'cost': cost})
 
+    ypred = ypred.T
+    ypred = np.argmax(ypred, axis = 1)
+
+    count = 0
+    for i in range(0, 32):
+        if ypred[i] == Y[i]:
+            count += 1
+    print("Model accuracy is {}".format((count/32)*100))
+
     alert(text='Training Complete!', title='ALERT', button='OK')
-
-
-
-    # ypred_rounded = np.argmax(ypred, axis = 0)
-    # count = 0
-    # for i in range(0, 32):
-    #     if ypred_rounded[i] == Y[i]:
-    #         count += 1
-    # print("Model accuracy is {}".format((count/32)*100))
 
     # To plot Cost vs Epochs
     # plt.title('Cost Function')
