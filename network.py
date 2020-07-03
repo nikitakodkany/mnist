@@ -87,7 +87,7 @@ class network:
         #cost with l2 regularization
         w1, w2, w3, w4 = self.get('w1', 'w2', 'w3', 'w4')
 
-        cost_entropy = cost = -np.mean(y * np.log(ypred + 1e-8))
+        cost_entropy = -np.mean(y * np.log(ypred + 1e-8))
         l2_regularization = lambd / (2*m) * (np.sum(np.square(w1)) + np.sum(np.square(w2)) + np.sum(np.square(w3)) + np.sum(np.square(w4)))
 
         cost = cost_entropy + l2_regularization
@@ -116,22 +116,133 @@ class network:
 
         self.put(dw4 = dw4, dw3 = dw3, dw2 = dw2, dw1 = dw1, db4 = db4, db3 = db3, db2 = db2, db1 = db1)
 
-    def update(self, rate = 0.05):
-        w1, w2, w3, w4, dw1, dw2, dw3, dw4, b1, b2, b3, b4, db1, db2, db3, db4 = self.get('w1', 'w2', 'w3', 'w4','dw1', 'dw2', 'dw3', 'dw4', 'b1', 'b2', 'b3', 'b4', 'db1', 'db2', 'db3', 'db4')
 
-        w1 -= rate * dw1
-        b1 -= rate * db1
+    def initialize_adam(self):
+        w1, w2, w3, w4, b1, b2, b3, b4 = self.get('w1', 'w2', 'w3', 'w4', 'b1', 'b2', 'b3', 'b4')
 
-        w2 -= rate * dw2
-        b2 -= rate * db2
+        vdw1 = np.zeros(w1.shape)
+        vdb1 = np.zeros(b1.shape)
+        sdw1 = np.zeros(w1.shape)
+        sdb1 = np.zeros(b1.shape)
 
-        w3 -= rate * dw3
-        b3 -= rate * db3
+        vdw2 = np.zeros(w2.shape)
+        vdb2 = np.zeros(b2.shape)
+        sdw2 = np.zeros(w2.shape)
+        sdb2 = np.zeros(b2.shape)
 
-        w4 -= rate * dw4
-        b4 -= rate * db4
+        vdw3 = np.zeros(w3.shape)
+        vdb3 = np.zeros(b3.shape)
+        sdw3 = np.zeros(w3.shape)
+        sdb3 = np.zeros(b3.shape)
+
+        vdw4 = np.zeros(w4.shape)
+        vdb4 = np.zeros(b4.shape)
+        sdw4 = np.zeros(w4.shape)
+        sdb4 = np.zeros(b4.shape)
+
+        self.put(vdw1=vdw1,vdw2=vdw2,vdw3=vdw3,vdw4=vdw4,vdb1=vdb1,vdb2=vdb2,vdb3=vdb3,vdb4=vdb4)
+        self.put(sdw1=sdw1,sdw2=sdw2,sdw3=sdw3,sdw4=sdw4,sdb1=sdb1,sdb2=sdb2,sdb3=sdb3,sdb4=sdb4)
+
+    def update_parameters_with_adam(self, t, beta1 = 0.9, beta2 = 0.999,  epsilon = 1e-8, rate = 0.05):
+        """
+        t  -- adam counter
+        beta1 -- Exponential decay hyperparameter for the past gradients estimates
+        beta2 -- Exponential decay hyperparameter for the past squared gradients estimates
+        epsilon -- hyperparameter preventing division by zero in Adam updates
+        v -- Adam variable, moving average of the first gradient
+        s -- Adam variable, moving average of the squared gradient
+        """
+
+        w1,w2,w3,w4,dw1,dw2,dw3,dw4,b1,b2,b3,b4,db1,db2,db3,db4 = self.get('w1','w2','w3','w4','dw1','dw2','dw3','dw4','b1','b2','b3','b4','db1','db2','db3','db4')
+        vdw1,vdw2,vdw3,vdw4,vdb1,vdb2,vdb3,vdb4, = self.get('vdw1','vdw2','vdw3','vdw4','vdb1','vdb2','vdb3','vdb4')
+        sdw1,sdw2,sdw3,sdw4,sdb1,sdb2,sdb3,sdb4 = self.get('sdw1','sdw2','sdw3','sdw4','sdb1','sdb2','sdb3','sdb4')
+
+        #moving average of the gradients
+        vdw1 = (beta1*vdw1) + ((1-beta1)*dw1)
+        vdb1 = (beta1*vdb1) + ((1-beta1)*db1)
+
+        vdw2 = (beta1*vdw2) + ((1-beta1)*dw2)
+        vdb2 = (beta1*vdb2) + ((1-beta1)*db2)
+
+        vdw3 = (beta1*vdw3) + ((1-beta1)*dw3)
+        vdb3 = (beta1*vdb3) + ((1-beta1)*db3)
+
+        vdw4 = (beta1*vdw4) + ((1-beta1)*dw4)
+        vdb4 = (beta1*vdb4) + ((1-beta1)*db4)
+
+        #compute bias-corrected first memnt estimate
+        vc_dw1 = vdw1 / (1-np.power(beta1,t))
+        vc_db1 = vdb1 / (1-np.power(beta1,t))
+
+        vc_dw2 = vdw2 / (1-np.power(beta1,t))
+        vc_db2 = vdb2 / (1-np.power(beta1,t))
+
+        vc_dw3 = vdw3 / (1-np.power(beta1,t))
+        vc_db3 = vdb3 / (1-np.power(beta1,t))
+
+        vc_dw4 = vdw4 / (1-np.power(beta1,t))
+        vc_db4 = vdb4 / (1-np.power(beta1,t))
+
+        #moving average of the squared gradients
+        sdw1 = (beta2*sdw1) + ((1-beta2)*(dw1*dw1))
+        sdb1 = (beta2*sdb1) + ((1-beta2)*(db1*db1))
+
+        sdw2 = (beta2*sdw2) + ((1-beta2)*(dw2*dw2))
+        sdb2 = (beta2*sdb2) + ((1-beta2)*(db2*db2))
+
+        sdw3 = (beta2*sdw3) + ((1-beta2)*(dw3*dw3))
+        sdb3 = (beta2*sdb3) + ((1-beta2)*(db3*db3))
+
+        sdw4 = (beta2*sdw4) + ((1-beta2)*(dw4*dw4))
+        sdb4 = (beta2*sdb4) + ((1-beta2)*(db4*db4))
+
+        #compute bias-corrected first memnt estimate
+        sc_dw1 = sdw1 / (1-np.power(beta2,t))
+        sc_db1 = sdb1 / (1-np.power(beta2,t))
+
+        sc_dw2 = sdw2 / (1-np.power(beta2,t))
+        sc_db2 = sdb2 / (1-np.power(beta2,t))
+
+        sc_dw3 = sdw3 / (1-np.power(beta2,t))
+        sc_db3 = sdb3 / (1-np.power(beta2,t))
+
+        sc_dw4 = sdw4 / (1-np.power(beta2,t))
+        sc_db4 = sdb4 / (1-np.power(beta2,t))
+
+        #update parameters
+        w1 -= rate * vc_dw1 / np.sqrt(sc_dw1+epsilon)
+        b1 -= rate * vc_db1 / np.sqrt(sc_db1+epsilon)
+
+        w2 -= rate * vc_dw2 / np.sqrt(sc_dw2+epsilon)
+        b2 -= rate * vc_db2 / np.sqrt(sc_db2+epsilon)
+
+        w3 -= rate * vc_dw3 / np.sqrt(sc_dw3+epsilon)
+        b3 -= rate * vc_db3 / np.sqrt(sc_db3+epsilon)
+
+        w4 -= rate * vc_dw4 / np.sqrt(sc_dw4+epsilon)
+        b4 -= rate * vc_db4 / np.sqrt(sc_db4+epsilon)
 
         self.put(w1 = w1, w2 = w2, w3 = w3, w4 = w4, b1 = b1, b2 = b2, b3 = b3, b4 = b4)
+        self.put(vdw1=vdw1,vdw2=vdw2,vdw3=vdw3,vdw4=vdw4,vdb1=vdb1,vdb2=vdb2,vdb3=vdb3,vdb4=vdb4)
+        self.put(sdw1=sdw1,sdw2=sdw2,sdw3=sdw3,sdw4=sdw4,sdb1=sdb1,sdb2=sdb2,sdb3=sdb3,sdb4=sdb4)
+
+
+    # def update(self, rate = 0.05):
+    #     w1, w2, w3, w4, dw1, dw2, dw3, dw4, b1, b2, b3, b4, db1, db2, db3, db4 = self.get('w1', 'w2', 'w3', 'w4','dw1', 'dw2', 'dw3', 'dw4', 'b1', 'b2', 'b3', 'b4', 'db1', 'db2', 'db3', 'db4')
+    #
+    #     w1 -= rate * dw1
+    #     b1 -= rate * db1
+    #
+    #     w2 -= rate * dw2
+    #     b2 -= rate * db2
+    #
+    #     w3 -= rate * dw3
+    #     b3 -= rate * db3
+    #
+    #     w4 -= rate * dw4
+    #     b4 -= rate * db4
+    #
+    #     self.put(w1 = w1, w2 = w2, w3 = w3, w4 = w4, b1 = b1, b2 = b2, b3 = b3, b4 = b4)
 
     def put(self, **kwargs):
         for key, value in kwargs.items():
@@ -171,10 +282,12 @@ class network:
 
 
 def main():
+    t = 0
     seed = 10
     costs = []
     epochs = 5
     n = network(xtrain, ytrain)
+    n.initialize_adam()
 
 
     for epoch in progressbar(range(epochs)):
@@ -189,11 +302,13 @@ def main():
             costs.append(n.cost(ypred, minibatch_y))
             # cost_total += n.cost(ypred, minibatch_y)
             n.backward(minibatch_x, minibatch_y)
-            n.update()
+            # n.update()
+            t += 1
+            n.update_parameters_with_adam(t)
 
     # #append cost every 100 epoch
     # cost_avg = cost_total / m
-    # if epoch%5 == 0:
+    # if epoch%100 == 0:
     #     costs.append(cost_avg)
 
 
