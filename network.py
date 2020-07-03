@@ -36,6 +36,10 @@ lambd = 0.1
 
 class network:
     def __init__(self,xtrain, ytrain):
+        """
+        layer size -- 4
+        HE initialization
+        """
 
         #layer size
         n_x = xtrain.shape[0]
@@ -62,7 +66,12 @@ class network:
         self.cache['b4'] = np.zeros((n_y, 1))
 
     def forward(self, x):
-        #forward propagation with bias
+        """
+        forward propagation with bias
+        activation function -- leaky relu
+        softmax activation -- last layer
+        """
+
         w1, w2, w3, w4, b1, b2, b3, b4 = self.get('w1', 'w2', 'w3', 'w4', 'b1', 'b2', 'b3', 'b4')
 
         z1 = np.dot(w1, x) + b1
@@ -84,7 +93,10 @@ class network:
         return a4
 
     def cost(self, ypred, y):
-        #cost with l2 regularization
+        """
+        cost with l2 regularization
+        """
+
         w1, w2, w3, w4 = self.get('w1', 'w2', 'w3', 'w4')
 
         cost_entropy = -np.mean(y * np.log(ypred + 1e-8))
@@ -95,7 +107,13 @@ class network:
 
 
     def backward(self, x, y):
-        #back propagation with bias and regularization
+        """
+        back propagation with bias and regularization
+        t -- thetas
+        dw -- weight derivatives
+        db -- bias derivatives
+        """
+
         a1, a2, a3, a4, w1, w2, w3, w4, dz1, dz2, dz3= self.get('a1', 'a2', 'a3', 'a4', 'w1', 'w2', 'w3', 'w4', 'dz1', 'dz2', 'dz3')
 
         t4 = a4 - y
@@ -118,6 +136,11 @@ class network:
 
 
     def initialize_adam(self):
+        """
+        v -- Adam variable, moving average of the first gradient
+        s -- Adam variable, moving average of the squared gradient
+        """
+
         w1, w2, w3, w4, b1, b2, b3, b4 = self.get('w1', 'w2', 'w3', 'w4', 'b1', 'b2', 'b3', 'b4')
 
         vdw1 = np.zeros(w1.shape)
@@ -254,6 +277,14 @@ class network:
         return x
 
     def random_mini_batches(self, batchsize = 32, seed = 0):
+        """
+        creates a list of random minibatches from (x, y)
+        X -- input data
+        Y -- true label vector
+        batchsize -- size of the mini-batches, integer
+
+        mini_batches -- list of synchronous (mini_batch_x, mini_batch_y)
+        """
 
         x, y = self.get('x', 'y')
         np.random.seed(seed)
@@ -285,7 +316,7 @@ def main():
     t = 0
     seed = 10
     costs = []
-    epochs = 5
+    epochs = 1200
     n = network(xtrain, ytrain)
     n.initialize_adam()
 
@@ -294,22 +325,22 @@ def main():
 
         seed += 1
         minibatches = n.random_mini_batches(seed)
-        # cost_total = 0
+        cost_total = 0
 
         for minibatch in minibatches:
             (minibatch_x, minibatch_y) = minibatch
             ypred = n.forward(minibatch_x)
-            costs.append(n.cost(ypred, minibatch_y))
-            # cost_total += n.cost(ypred, minibatch_y)
+            # costs.append(n.cost(ypred, minibatch_y))
+            cost_total += n.cost(ypred, minibatch_y)
             n.backward(minibatch_x, minibatch_y)
             # n.update()
             t += 1
             n.update_parameters_with_adam(t)
 
-    # #append cost every 100 epoch
-    # cost_avg = cost_total / m
-    # if epoch%100 == 0:
-    #     costs.append(cost_avg)
+    #append cost every 100 epoch
+    cost_avg = cost_total / m
+    if epoch%100 == 0:
+        costs.append(cost_avg)
 
 
     print("")
