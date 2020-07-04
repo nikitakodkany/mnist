@@ -250,23 +250,6 @@ class network:
         self.put(sdw1=sdw1,sdw2=sdw2,sdw3=sdw3,sdw4=sdw4,sdb1=sdb1,sdb2=sdb2,sdb3=sdb3,sdb4=sdb4)
 
 
-    # def update(self, rate = 0.05):
-    #     w1, w2, w3, w4, dw1, dw2, dw3, dw4, b1, b2, b3, b4, db1, db2, db3, db4 = self.get('w1', 'w2', 'w3', 'w4','dw1', 'dw2', 'dw3', 'dw4', 'b1', 'b2', 'b3', 'b4', 'db1', 'db2', 'db3', 'db4')
-    #
-    #     w1 -= rate * dw1
-    #     b1 -= rate * db1
-    #
-    #     w2 -= rate * dw2
-    #     b2 -= rate * db2
-    #
-    #     w3 -= rate * dw3
-    #     b3 -= rate * db3
-    #
-    #     w4 -= rate * dw4
-    #     b4 -= rate * db4
-    #
-    #     self.put(w1 = w1, w2 = w2, w3 = w3, w4 = w4, b1 = b1, b2 = b2, b3 = b3, b4 = b4)
-
     def put(self, **kwargs):
         for key, value in kwargs.items():
             self.cache[key] = value
@@ -316,7 +299,7 @@ def main():
     t = 0
     seed = 10
     costs = []
-    epochs = 1200
+    epochs = 300
     n = network(xtrain, ytrain)
     n.initialize_adam()
 
@@ -324,14 +307,13 @@ def main():
     for epoch in progressbar(range(epochs)):
 
         seed += 1
-        minibatches = n.random_mini_batches(seed)gi
+        minibatches = n.random_mini_batches(seed)
 
         for minibatch in minibatches:
             (minibatch_x, minibatch_y) = minibatch
             ypred = n.forward(minibatch_x)
             costs.append(n.cost(ypred, minibatch_y))
             n.backward(minibatch_x, minibatch_y)
-            # n.update()
             t += 1
             n.update_parameters_with_adam(t)
 
