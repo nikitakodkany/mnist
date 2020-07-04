@@ -173,7 +173,7 @@ class network:
 def main():
     seed = 10
     costs = []
-    epochs = 5
+    epochs = 1200
     n = network(xtrain, ytrain)
 
 
