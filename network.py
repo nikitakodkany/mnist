@@ -324,23 +324,16 @@ def main():
     for epoch in progressbar(range(epochs)):
 
         seed += 1
-        minibatches = n.random_mini_batches(seed)
-        cost_total = 0
+        minibatches = n.random_mini_batches(seed)gi
 
         for minibatch in minibatches:
             (minibatch_x, minibatch_y) = minibatch
             ypred = n.forward(minibatch_x)
-            # costs.append(n.cost(ypred, minibatch_y))
-            cost_total += n.cost(ypred, minibatch_y)
+            costs.append(n.cost(ypred, minibatch_y))
             n.backward(minibatch_x, minibatch_y)
             # n.update()
             t += 1
             n.update_parameters_with_adam(t)
-
-    #append cost every 100 epoch
-    cost_avg = cost_total / m
-    if epoch%100 == 0:
-        costs.append(cost_avg)
 
 
     print("")
@@ -365,7 +358,7 @@ def main():
 
     # To plot Cost vs Epochs
     plt.title('Learning rate = 0.05')
-    plt.xlabel('epochs (per 100)')
+    plt.xlabel('epochs')
     plt.ylabel('cost')
     plt.plot(costs)
     plt.show()
