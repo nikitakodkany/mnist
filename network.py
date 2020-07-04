@@ -166,7 +166,7 @@ class network:
         self.put(vdw1=vdw1,vdw2=vdw2,vdw3=vdw3,vdw4=vdw4,vdb1=vdb1,vdb2=vdb2,vdb3=vdb3,vdb4=vdb4)
         self.put(sdw1=sdw1,sdw2=sdw2,sdw3=sdw3,sdw4=sdw4,sdb1=sdb1,sdb2=sdb2,sdb3=sdb3,sdb4=sdb4)
 
-    def update_parameters_with_adam(self, t, beta1 = 0.9, beta2 = 0.999,  epsilon = 1e-8, rate = 0.05):
+    def update_parameters_with_adam(self, t, beta1 = 0.9, beta2 = 0.999,  epsilon = 1e-8, rate = 0.005):
         """
         t  -- adam counter
         beta1 -- Exponential decay hyperparameter for the past gradients estimates
@@ -339,7 +339,7 @@ def main():
 
 
     # To plot Cost vs Epochs
-    plt.title('Learning rate = 0.05')
+    plt.title('Learning rate = 0.005')
     plt.xlabel('epochs')
     plt.ylabel('cost')
     plt.plot(costs)
