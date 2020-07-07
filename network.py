@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 
 import warnings
 warnings.filterwarnings("ignore", message= "the imp module is deprecated in favour of importlib; see the module's documentation for alternative uses")
-warnings.filterwarnings("ignore", message= "unclosed file <_io.TextIOWrapper name='dymplot.csv' mode='r' encoding='UTF-8'>")
 warnings.filterwarnings("ignore", message= "module 'gi.repository.Gdk' has no attribute 'CursorType'")
 
 
