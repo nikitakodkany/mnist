@@ -10,6 +10,8 @@ There is also a dimentions.txt file that contains the dimentions of the entities
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
+# NOTE - Switch to Adam-branch for Adam implementation of the same.
+
 ### Prerequisites
 
 Packages to install before running the main script - network.py
