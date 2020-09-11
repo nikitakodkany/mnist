@@ -28,7 +28,7 @@ Packages to install before running the main script - network.py
 
 * Python
 
-## Authors
+## Author
 
 * **Nikita Kodkany** - *Student*
 
