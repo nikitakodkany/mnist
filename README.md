@@ -1,8 +1,8 @@
 # DIGIT RECOGNITION - MNIST DATASET
 
-THIS IS A NUERAL NETWORK BUILT FROM SCRATCH USING PLAIN NUMPY!
+THIS IS A NEURAL NETWORK BUILT FROM SCRATCH USING PLAIN NUMPY!
 
-Network.py is a python script that has a 4 layer deep nueral network with 200, 186 and 190 nuerons in the hidden layers. It has a directory named 'dataset' which contains the dataset (image and labels, train and test). It also has a directory named 'archive' which contains three python scripts named 'functions.py', 'loader.py', 'onehoten.py' where the first script contains activation functions-function to calculate accuracy, dataset loader and converting-reshaping the images-labels respectively.
+Network.py is a python script that has a 4 layer deep neural network with 200, 186 and 190 nuerons in the hidden layers. It has a directory named 'dataset' which contains the dataset (image and labels, train and test). It also has a directory named 'archive' which contains three python scripts named 'functions.py', 'loader.py', 'onehoten.py' where the first script contains activation functions-function to calculate accuracy, dataset loader and converting-reshaping the images-labels respectively.
 
 There is also a dimentions.txt file that contains the dimentions of the entities for easy guidance.
 
